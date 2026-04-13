@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Geography Trivia</title>
+  <style>
+    body {
+      font-family: Georgia, serif;
+      background-color: #1a1a2e;
+      color: #eee;
+      display: flex;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 600px;
+      width: 100%;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 28px;
+      margin-bottom: 0.25rem;
+      color: #f0c040;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #aaa;
+      margin-bottom: 2rem;
+      font-size: 14px;
+    }
+
+    .progress-bar-track {
+      background-color: #333;
+      border-radius: 999px;
+      height: 8px;
+      margin-bottom: 0.5rem;
+    }
+
+    .progress-bar-fill {
+      background-color: #f0c040;
+      height: 8px;
+      border-radius: 999px;
+      transition: width 0.4s;
+    }
+
+    .progress-label {
+      font-size: 13px;
+      color: #aaa;
+      margin-bottom: 1.5rem;
+    }
+
+    .difficulty-badge {
+      display: inline-block;
+      font-size: 12px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      margin-bottom: 1rem;
+      font-family: Arial, sans-serif;
+    }
+
+    .easy   { background-color: #2d5a2d; color: #90ee90; }
+    .medium { background-color: #5a4a1a; color: #f0c040; }
+    .hard   { background-color: #5a1a1a; color: #ff8080; }
+
+    .question-box {
+      background-color: #16213e;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+      font-size: 18px;
+      line-height: 1.6;
+    }
+
+    .answers {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 1.25rem;
+    }
+
+    .answer-btn {
+      padding: 0.85rem 1rem;
+      font-size: 15px;
+      font-family: Georgia, serif;
+      text-align: left;
+      background-color: #16213e;
+      border: 1px solid #444;
+      border-radius: 8px;
+      cursor: pointer;
+      color: #eee;
+      transition: background-color 0.2s, border-color 0.2s;
+    }
+
+    .answer-btn:hover {
+      background-color: #1f2f50;
+      border-color: #f0c040;
+    }
+
+    .answer-btn.correct {
+      background-color: #1a3a1a;
+      border-color: #90ee90;
+      color: #90ee90;
+    }
+
+    .answer-btn.wrong {
+      background-color: #3a1a1a;
+      border-color: #ff8080;
+      color: #ff8080;
+    }
+
+    .answer-btn:disabled {
+      cursor: default;
+      opacity: 0.6;
+    }
+
+    .answer-btn.correct:disabled,
+    .answer-btn.wrong:disabled {
+      opacity: 1;
+    }
+
+    .feedback {
+      min-height: 24px;
+      font-size: 15px;
+      margin-bottom: 1.25rem;
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+    }
+
+    .feedback.correct { background-color: #1a3a1a; color: #90ee90; }
+    .feedback.wrong   { background-color: #3a1a1a; color: #ff8080; }
+
+    .next-btn {
+      display: block;
+      width: 100%;
+      padding: 0.85rem;
+      font-size: 16px;
+      font-family: Georgia, serif;
+      background-color: #f0c040;
+      color: #1a1a2e;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.2s;
+    }
+
+    .next-btn:hover { background-color: #e0b030; }
+
+    /* Results screen */
+    .results {
+      display: none;
+      text-align: center;
+    }
+
+    .iq-score {
+      font-size: 72px;
+      font-weight: bold;
+      color: #f0c040;
+      margin: 1rem 0 0.25rem;
+    }
+
+    .iq-label {
+      font-size: 16px;
+      color: #aaa;
+      margin-bottom: 1.5rem;
+    }
+
+    .iq-description {
+      background-color: #16213e;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 1.5rem;
+      font-size: 16px;
+      line-height: 1.7;
+      margin-bottom: 1.5rem;
+      color: #ddd;
+    }
+
+    .score-summary {
+      font-size: 14px;
+      color: #aaa;
+      margin-bottom: 1.5rem;
+    }
+
+    .play-again-btn {
+      padding: 0.85rem 2rem;
+      font-size: 16px;
+      font-family: Georgia, serif;
+      background-color: #f0c040;
+      color: #1a1a2e;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .play-again-btn:hover { background-color: #e0b030; }
+  </style>
+</head>
+
+<body>
+<div class="container">
+
+  <!-- Game screen -->
+  <div id="game-screen">
+    <h1>Geography Trivia</h1>
+    <p class="subtitle">20 questions — how smart are you really?</p>
+
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill" id="progress-bar" style="width: 0%"></div>
+    </div>
+    <p class="progress-label">Question <span id="q-num">1</span> of 20</p>
+
+    <span class="difficulty-badge easy" id="difficulty-badge">Easy</span>
+
+    <div class="question-box">
+      <p id="question-text"></p>
+    </div>
+
+    <div class="answers" id="answers-grid"></div>
+
+    <div class="feedback" id="feedback"></div>
+
+    <button class="next-btn" id="next-btn" onclick="nextQuestion()" style="display:none">Next question →</button>
+  </div>
+
+  <!-- Results screen -->
+  <div class="results" id="results-screen">
+    <h1>Geography Trivia</h1>
+    <p class="subtitle">Your results are in</p>
+    <div class="iq-score" id="iq-score"></div>
+    <p class="iq-label">Geography IQ</p>
+    <div class="iq-description" id="iq-description"></div>
+    <p class="score-summary" id="score-summary"></p>
+    <button class="play-again-btn" onclick="restartGame()">Play again</button>
+  </div>
+
+</div>
+
+<script>
+
+  var questions = [
+
+    // --- EASY (questions 1–7) ---
+    {
+      question: "What is the capital city of Australia?",
+      answers: ["Sydney", "Canberra", "Melbourne", "Brisbane"],
+      correct: 1,
+      difficulty: "easy"
+    },
+    {
+      question: "Which is the largest ocean on Earth?",
+      answers: ["Atlantic", "Indian", "Arctic", "Pacific"],
+      correct: 3,
+      difficulty: "easy"
+    },
+    {
+      question: "How many continents are there on Earth?",
+      answers: ["5", "6", "7", "8"],
+      correct: 2,
+      difficulty: "easy"
+    },
+    {
+      question: "What is the capital of France?",
+      answers: ["Lyon", "Marseille", "Paris", "Nice"],
+      correct: 2,
+      difficulty: "easy"
+    },
+    {
+      question: "Which country has the most people in the world?",
+      answers: ["USA", "India", "Russia", "China"],
+      correct: 1,
+      difficulty: "easy"
+    },
+    {
+      question: "What is the longest river in the world?",
+      answers: ["Amazon", "Nile", "Yangtze", "Mississippi"],
+      correct: 1,
+      difficulty: "easy"
+    },
+    {
+      question: "On which continent is Egypt?",
+      answers: ["Asia", "Europe", "Africa", "South America"],
+      correct: 2,
+      difficulty: "easy"
+    },
+
+    // --- MEDIUM (questions 8–14) ---
+    {
+      question: "What is the smallest country in the world?",
+      answers: ["Monaco", "San Marino", "Liechtenstein", "Vatican City"],
+      correct: 3,
+      difficulty: "medium"
+    },
+    {
+      question: "Which African country has the most pyramids?",
+      answers: ["Egypt", "Sudan", "Libya", "Ethiopia"],
+      correct: 1,
+      difficulty: "medium"
+    },
+    {
+      question: "What is the capital of Canada?",
+      answers: ["Toronto", "Vancouver", "Ottawa", "Montreal"],
+      correct: 2,
+      difficulty: "medium"
+    },
+    {
+      question: "Which country do the Galapagos Islands belong to?",
+      answers: ["Peru", "Colombia", "Ecuador", "Chile"],
+      correct: 2,
+      difficulty: "medium"
+    },
+    {
+      question: "What is the largest country in Africa by area?",
+      answers: ["Sudan", "Congo", "Algeria", "Libya"],
+      correct: 2,
+      difficulty: "medium"
+    },
+    {
+      question: "Which sea lies between Europe and Africa?",
+      answers: ["Red Sea", "Black Sea", "Mediterranean Sea", "Caspian Sea"],
+      correct: 2,
+      difficulty: "medium"
+    },
+    {
+      question: "Which country has the most natural lakes?",
+      answers: ["Russia", "Canada", "USA", "Finland"],
+      correct: 1,
+      difficulty: "medium"
+    },
+
+    // --- HARD (questions 15–20) ---
+    {
+      question: "What is the capital of Kazakhstan?",
+      answers: ["Almaty", "Astana", "Shymkent", "Aktobe"],
+      correct: 1,
+      difficulty: "hard"
+    },
+    {
+      question: "Which country is the Thar Desert located in?",
+      answers: ["Iran", "Afghanistan", "India", "Pakistan"],
+      correct: 2,
+      difficulty: "hard"
+    },
+    {
+      question: "What is the deepest lake in the world?",
+      answers: ["Lake Superior", "Lake Titicaca", "Lake Baikal", "Caspian Sea"],
+      correct: 2,
+      difficulty: "hard"
+    },
+    {
+      question: "Which tiny country is completely surrounded by Italy?",
+      answers: ["Vatican City", "Monaco", "Andorra", "San Marino"],
+      correct: 3,
+      difficulty: "hard"
+    },
+    {
+      question: "How many countries share a border with China?",
+      answers: ["12", "14", "16", "10"],
+      correct: 1,
+      difficulty: "hard"
+    },
+    {
+      question: "What is the official capital of Nauru, the world's smallest island nation?",
+      answers: ["Yaren", "Aiwo", "Meneng", "Anibare"],
+      correct: 0,
+      difficulty: "hard"
+    }
+  ]
+
+  var currentQuestion = 0
+  var score = 0
+  var answered = false
+
+  function loadQuestion() {
+    var q = questions[currentQuestion]
+
+    // Update progress
+    document.getElementById('q-num').innerText = currentQuestion + 1
+    var percent = (currentQuestion / 20) * 100
+    document.getElementById('progress-bar').style.width = percent + '%'
+
+    // Update difficulty badge
+    var badge = document.getElementById('difficulty-badge')
+    badge.innerText = q.difficulty.charAt(0).toUpperCase() + q.difficulty.slice(1)
+    badge.className = 'difficulty-badge ' + q.difficulty
+
+    // Update question text
+    document.getElementById('question-text').innerText = q.question
+
+    // Clear feedback
+    var feedback = document.getElementById('feedback')
+    feedback.innerText = ''
+    feedback.className = 'feedback'
+
+    // Hide next button
+    document.getElementById('next-btn').style.display = 'none'
+
+    answered = false
+
+    // Build answer buttons
+    var grid = document.getElementById('answers-grid')
+    grid.innerHTML = ''
+
+    for (var i = 0; i < q.answers.length; i++) {
+      var btn = document.createElement('button')
+      btn.className = 'answer-btn'
+      btn.innerText = q.answers[i]
+      btn.setAttribute('data-index', i)
+      btn.onclick = function() {
+        checkAnswer(parseInt(this.getAttribute('data-index')))
+      }
+      grid.appendChild(btn)
+    }
+  }
+
+  function checkAnswer(index) {
+    if (answered) return
+    answered = true
+
+    var q = questions[currentQuestion]
+    var buttons = document.querySelectorAll('.answer-btn')
+    var feedback = document.getElementById('feedback')
+
+    // Disable all buttons
+    for (var i = 0; i < buttons.length; i++) {
+      buttons[i].disabled = true
+    }
+
+    if (index === q.correct) {
+      score = score + 1
+      buttons[index].classList.add('correct')
+      feedback.innerText = 'Correct! Well done.'
+      feedback.className = 'feedback correct'
+    } else {
+      buttons[index].classList.add('wrong')
+      buttons[q.correct].classList.add('correct')
+      feedback.innerText = 'Wrong! The correct answer is: ' + q.answers[q.correct]
+      feedback.className = 'feedback wrong'
+    }
+
+    document.getElementById('next-btn').style.display = 'block'
+
+    // If last question, change button text
+    if (currentQuestion === 19) {
+      document.getElementById('next-btn').innerText = 'See my results →'
+    }
+  }
+
+  function nextQuestion() {
+    currentQuestion = currentQuestion + 1
+
+    if (currentQuestion >= 20) {
+      showResults()
+    } else {
+      loadQuestion()
+    }
+  }
+
+  function showResults() {
+    document.getElementById('game-screen').style.display = 'none'
+    document.getElementById('results-screen').style.display = 'block'
+
+    // Calculate IQ score (range: 70 to 145)
+    var iq = Math.round(70 + (score / 20) * 75)
+
+    document.getElementById('iq-score').innerText = iq
+    document.getElementById('score-summary').innerText = 'You got ' + score + ' out of 20 questions correct.'
+
+    // IQ description
+    var description = ''
+    if (score <= 4) {
+      description = 'You are just getting started with geography! The world is a big place — keep exploring and you will pick this up fast. Try again and see how much you improve.'
+    } else if (score <= 8) {
+      description = 'You have a basic knowledge of the world around you. You got the easier questions but the harder ones tripped you up. A bit more studying and you will be surprising people.'
+    } else if (score <= 12) {
+      description = 'Solid geography knowledge! You clearly paid attention in school. You handled the medium questions well but the hardest ones gave you trouble. Not bad at all.'
+    } else if (score <= 16) {
+      description = 'Impressive! You have strong geography knowledge well above average. The hard questions barely slowed you down. You clearly have a genuine interest in the world.'
+    } else {
+      description = 'Outstanding! You are a geography genius. Very few people can score this high. You breezed through questions that most people find very difficult. Remarkable.'
+    }
+
+    document.getElementById('iq-description').innerText = description
+  }
+
+  function restartGame() {
+    currentQuestion = 0
+    score = 0
+    answered = false
+    document.getElementById('results-screen').style.display = 'none'
+    document.getElementById('game-screen').style.display = 'block'
+    loadQuestion()
+  }
+
+  // Start the game
+  loadQuestion()
+
+</script>
+</body>
+</html>
